@@ -1,0 +1,44 @@
+var set = ['a', 'b', 'a'];
+//var set = ['a', 'b', 'b']
+
+var pp = [0.5, 0.5];
+
+
+var prn = function(z) {
+  if(sum(z) == 0)
+    return 'Neither program can generate this set of strings';
+  else
+    return 'Probability that this set of strings is from program 1 = ' + z[0]/sum(z);
+}
+var P1 = function() {
+  return flip(0.6)? 'a' : 'b';
+}
+  
+
+var P2 = function() {
+  return flip(0.4) ? 'a' : 'b';
+}
+
+var P = [P1, P2];
+
+var dist = map(
+  function(x){ return Infer( {method: 'rejection', samples: 1000}, x);}, 
+  P)
+
+/*didn't use enumeration because things like beta can be involved in the programs
+ which enumeration cannot handle because of finite support */
+
+var pro = 
+    map(function(dee) {
+    var z = reduce(function(x, acc) { return x + acc; }, 0, 
+    map(function(obs) 
+    {
+    dee.score(obs);
+    }, set));
+    return Math.exp(z);}, dist);
+
+var wpro = map2(function(x,y) {
+  return x*y;}, pro, pp
+)
+
+prn(wpro);

@@ -1,0 +1,41 @@
+var set = ['a', 'a', 'b','b', 'b', 'b','b','b', 'b', 'b']; 
+globalStore.theta = 0;
+
+var P = function() {
+  return flip(globalStore.theta) ?  'a' : 'b';
+}
+
+var dist = function(t) {
+  globalStore.theta = t;
+  return Infer(
+  {method: 'enumerate', maxExecutions: 50, strategy: 'breadthFirst'},
+   P);
+}
+
+var F = function(observations) {
+  var x = beta(1,1);
+  
+  map(function(obs) {
+    factor(dist(x).score(obs));
+  }, observations);
+  
+  return {
+    x
+  };
+};
+
+var post = Infer({method: 'MCMC', samples: 200, onlyMAP: true}, 
+           function() {return F(set);}
+                );
+
+var params = sample(post);
+
+if (params.x >= 0.5) {
+  console.log("theta1 = " + params.x);
+  console.log("theta2 = X");
+}
+
+else {
+  console.log("theta1 = " + (1-params.x));
+  console.log("theta2 = Y");    
+}
